@@ -4,10 +4,19 @@ import matplotlib.pyplot as plt
 from decisiontree_regression import createTree, traverseTree, createDataset
 
 def createRandomForest(dataset, labels, num_trees=10, max_depth=float('inf'), min_samples_split=2):
+    """
+        :param dataset: 数据集
+        :param labels: 特征集
+        :param num_trees: 决策树数量
+        :param max_depth: 最大深度
+        :param min_samples_split: 最小拆分数
+        :return: 随机森林
+    """
     forest = []
     for _ in range(num_trees):
-        # Create a tree using a bootstrapped sample
+        # 有放回的随机抽样
         indices = [random.randint(0, len(dataset) - 1) for _ in range(len(dataset))]
+        # 根据随机抽样的下标获取样本
         bootstrap_sample = [dataset[i] for i in indices]
         tree = createTree(bootstrap_sample, labels[:], max_depth, min_samples_split)
         forest.append(tree)

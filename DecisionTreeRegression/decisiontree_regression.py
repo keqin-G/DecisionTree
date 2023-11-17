@@ -6,6 +6,15 @@ import random
 
 
 def createTree(dataset, labels, max_depth = inf, min_sample_split = 2):
+    """
+        :param dataset: 数据集
+        :param labels: 特征集
+        :param max_depth: 最大深度
+        :param min_sample_split: 最小拆分数
+        
+        :return: 回归决策树
+    """
+    # 获取所有样本的值
     target_values = [e[-1] for e in dataset]
     
     # 如果所有样本的值都相同 或 达到最大深度 或 样本数量小于最少拆分数，返回平均值
@@ -16,20 +25,26 @@ def createTree(dataset, labels, max_depth = inf, min_sample_split = 2):
     if len(dataset[0]) == 1:
         return sum(target_values) / len(target_values)
     
+    # 选择最好的特征和阈值
     bestFeature, bestThreshold = chooseBestFeatureToSplit(dataset)
-    # 如果找不到一个最好特征
+    # 如果找不到一个最好特征 返回平均值
     if bestFeature == -1:
         return sum(target_values) / len(target_values)
+    # 选中的特征的标签
     bestFeatureLabel = labels[bestFeature]
-    del labels[bestFeature]
-    tree = {bestFeatureLabel: {'threshold': bestThreshold}}
-    subDataset1, subDataset2 = splitContinuousDataset(dataset, bestFeature, bestThreshold)
-    tree[bestFeatureLabel]['<='] = createTree(subDataset1, labels[:], max_depth - 1, min_sample_split)
+    # 将选中的特征从特征集中删除 
+    del labels[bestFeature] 
+    # 以选中的特征为根节点创建树
+    tree = {bestFeatureLabel: {'threshold': bestThreshold}} 
+    # 划分数据集
+    subDataset1, subDataset2 = splitContinuousDataset(dataset, bestFeature, bestThreshold) 
+    # 递归创建左右子树
+    tree[bestFeatureLabel]['<='] = createTree(subDataset1, labels[:], max_depth - 1, min_sample_split) 
     tree[bestFeatureLabel]['>'] = createTree(subDataset2, labels[:], max_depth - 1, min_sample_split)
     return tree
 
 def chooseBestFeatureToSplit(dataset):
-    numFeatures = len(dataset[0]) - 1
+    numFeatures = len(dataset[0]) - 1 
     baseMSE = calcMSE(dataset)
     bestInfoGain = 0
     bestFeature = -1
@@ -38,14 +53,16 @@ def chooseBestFeatureToSplit(dataset):
         featureList = [e[i] for e in dataset]
         uniqueVals = set(featureList)
         uniqueVals = sorted(uniqueVals)
+        # 取相邻两个值的中间值作为阈值
         threshold = [(uniqueVals[i] + uniqueVals[i + 1]) / 2 for i in range(len(uniqueVals) - 1)]
         for val in threshold:
             subDataset1, subDataset2 = splitContinuousDataset(dataset, i, val)
             p = len(subDataset1) / float(len(subDataset1) + len(subDataset1))
-            # 实测两种方法差不多
-            mse =  p * calcMSE(subDataset1) + (1 - p) * calcMSE(subDataset2)
+            # 实测两种方法差不多 但加权的方式极差小一点
+            mse = p * calcMSE(subDataset1) + (1 - p) * calcMSE(subDataset2)
             # mse = calcMSE(subDataset1) + calcMSE(subDataset2) 
             infoGain = baseMSE - mse
+            # 更新最佳信息增益
             if infoGain > bestInfoGain:
                 bestInfoGain = infoGain
                 bestFeature = i
@@ -53,11 +70,13 @@ def chooseBestFeatureToSplit(dataset):
     return bestFeature, bestThreshold
 
 def splitContinuousDataset(dataset, index, value):
+    # 以index为特征 划分数据集
     subDataset1 = [sample[:index] + sample[index + 1:] for sample in dataset if sample[index] <= value]
     subDataset2 = [sample[:index] + sample[index + 1:] for sample in dataset if sample[index] > value]
     return subDataset1, subDataset2
 
 def calcMSE(dataset):
+    # 计算均方误差
     num = len(dataset)
     target_values = [e[-1] for e in dataset]
     avg = sum(target_values) / float(num)
@@ -65,6 +84,7 @@ def calcMSE(dataset):
     return mse
 
 def createDataset(filename='data.csv'):
+    # 读取数据集
     dataset = []
     with open(filename, 'r', encoding='utf-8') as file:
         csv_reader = csv.reader(file)
