@@ -73,7 +73,8 @@ def chooseBestFeatureToSplit(dataset):
         float: 最佳阈值
     """
     numFeatures = len(dataset[0]) - 1 
-    baseEntropy = calcShannonEntropy(dataset)
+    # baseEntropy = calcShannonEntropy(dataset)
+    baseEntropy = calcGini(dataset)
     bestInfoGain = 0
     bestFeature = -1
     bestThreshold = 0
@@ -85,13 +86,28 @@ def chooseBestFeatureToSplit(dataset):
         for val in thresholds:
             subDataset1, subDataset2 = splitContinuousDataset(dataset, i, val)
             p = len(subDataset1) / float(len(dataset))
-            newEntropy = p * calcShannonEntropy(subDataset1) + (1 - p) * calcShannonEntropy(subDataset2)
+            # newEntropy = p * calcShannonEntropy(subDataset1) + (1 - p) * calcShannonEntropy(subDataset2)
+            newEntropy = p * calcGini(subDataset1) + (1 - p) * calcGini(subDataset2)
             infoGain = baseEntropy - newEntropy
             if infoGain > bestInfoGain:
                 bestInfoGain = infoGain
                 bestFeature = i
                 bestThreshold = val
     return bestFeature, bestThreshold
+
+def calcGini(dataset):
+    num = len(dataset)
+    labelCounter = {}
+    for data in dataset:
+        label = data[-1]
+        if label not in labelCounter.keys():
+            labelCounter[label] = 0
+        labelCounter[label] += 1
+    gini = 1
+    for key in labelCounter:
+        p = labelCounter[key] / float(num)
+        gini -= p ** 2
+    return gini
 
 def calcShannonEntropy(dataset):
     """

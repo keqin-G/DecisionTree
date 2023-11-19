@@ -72,7 +72,8 @@ def chooseBestFeatureToSplit(dataset):
             int: 最佳特征的索引
     """
     numFeatures = len(dataset[0]) - 1
-    baseEntropy = calcShannonEntropy(dataset)
+    # baseEntropy = calcShannonEntropy(dataset)
+    baseEntropy = calcGini(dataset)
     bestInfoGain = 0
     bestFeature = -1
     for i in range(numFeatures):
@@ -82,7 +83,8 @@ def chooseBestFeatureToSplit(dataset):
         for val in uniqueVals:
             subDataset = splitDataset(dataset, i, val)
             p = len(subDataset) / float(len(dataset))
-            newEntropy += p * calcShannonEntropy(subDataset)
+            newEntropy += p * calcGini(subDataset)
+            # newEntropy += p * calcShannonEntropy(subDataset)
         infoGain = baseEntropy - newEntropy
         if infoGain > bestInfoGain:
             bestInfoGain = infoGain
@@ -102,6 +104,20 @@ def splitDataset(dataset, asix, val):
         list: 划分后的数据集
     """
     return [featureVec[:asix] + featureVec[asix + 1:] for featureVec in dataset if featureVec[asix] == val]
+
+def calcGini(dataset):
+    num = len(dataset)
+    labelCounter = {}
+    for data in dataset:
+        label = data[-1]
+        if label not in labelCounter.keys():
+            labelCounter[label] = 0
+        labelCounter[label] += 1
+    gini = 1
+    for key in labelCounter:
+        p = labelCounter[key] / float(num)
+        gini -= p ** 2
+    return gini
 
 def calcShannonEntropy(dataset):
     """

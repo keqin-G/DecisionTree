@@ -143,7 +143,7 @@ if __name__ == '__main__':
         else:
             training_data.append(data)
 
-    tree = createTree(training_data, labels, max_depth = inf)    
+    tree = createTree(training_data, labels, max_depth = 10)    
     # plotTree.createPlot(tree)
 
     real = [e[-1] for e in test_data]
