@@ -190,7 +190,7 @@ def traverseTree(tree, labels, data_point):
 
 
 if __name__ == '__main__':
-    dataset, labels = createDataset('bill_authentication.csv')
+    dataset, labels = createDataset('../dataset/bill_authentication.csv')
     labels_backup = labels[:]
     
     test_data_size = 30

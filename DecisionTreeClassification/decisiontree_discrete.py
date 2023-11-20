@@ -160,7 +160,7 @@ def predict(tree, feature_labels, test_data):
 
 
 if __name__ == '__main__':
-    dataset, labels = createDataset('watermelon2.0.csv')
+    dataset, labels = createDataset('../dataset/watermelon2.0.csv')
     labels_backup = labels[:]
     featureLabels = []
     tree = createTree(dataset, labels, featureLabels, max_depth=3)
