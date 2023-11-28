@@ -128,7 +128,7 @@ def traverseTree(tree, labels, data_point):
     return traverseTree(tree[feature_label][branch_key], labels, data_point)
 
 if __name__ == '__main__':
-    dataset, labels = createDataset('../data/HousingData.csv')
+    dataset, labels = createDataset('../dataset/HousingData.csv')
     feature_labels = labels[:]
     dataset_size = len(dataset)
     test_data_size = 100

@@ -30,7 +30,7 @@ def predictRandomForest(forest, labels, test_data):
     return sum(predictions) / len(predictions)
 
 if __name__ == '__main__':
-    dataset, labels = createDataset('HousingData.csv')
+    dataset, labels = createDataset('../dataset/HousingData.csv')
     labels_backup = labels[:]
     dataset_size = len(dataset)
     test_data_size = 100
