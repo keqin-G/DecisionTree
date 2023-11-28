@@ -1,6 +1,4 @@
-from collections import deque
 from math import log, inf
-import plotTree
 import csv
 
 
@@ -16,40 +14,43 @@ def createDataset(filename='data.csv'):
     return dataset, labels
 
 
-def createTree(dataset, labels, max_depth=float(inf)):
-    """
-    递归构建决策树
+from collections import deque
+from math import inf
 
-    :param dataset (list): 数据集
-    :param labels (list): 特征标签列表
-
-    :return
-       dict: 决策树
-    """
-    root = {}
-    queue = deque([(root, dataset, labels, 0)])
+def createTree(dataset, labels, max_depth=inf):
+    root = {}  # 存储决策树的根节点
+    queue = deque([(root, dataset, labels, 0)])  # 使用队列进行层次遍历
     while queue:
         current_node, current_dataset, current_labels, depth = queue.popleft()
 
         classList = [e[-1] for e in current_dataset]
-        if classList.count(classList[0]) == len(classList) or max_depth == depth:  # 如果所有样本属于同一类别，则返回该类别
-            current_node = classList[0]
+        if classList.count(classList[0]) == len(classList) or depth == max_depth:
+            current_node['class'] = classList[0]
             continue
+
         if len(current_dataset[0]) == 1:
-            current_node = majorityCnt(classList)  # 如果所有特征都用于划分，返回样本中类别最多的类别
+            current_node['class'] = majorityCnt(classList)
             continue
+
         bestFeature = chooseBestFeatureToSplit(current_dataset)
         bestFeatureLabel = current_labels[bestFeature]
         current_node[bestFeatureLabel] = {}
         
-        subLabels = labels[:]
+        subLabels = current_labels[:]
         del subLabels[bestFeature]
+
         featureVal = [e[bestFeature] for e in current_dataset]
         uniqueVals = set(featureVal)
         for val in uniqueVals:
-            current_node[bestFeatureLabel][val] = createTree(splitDataset(current_dataset, bestFeature, val), subLabels,
-                                                    max_depth - 1)
+            split_data = splitDataset(current_dataset, bestFeature, val)
+            sub_node = {'value': val}
+            current_node[bestFeatureLabel][val] = sub_node
+            queue.append((sub_node, split_data, subLabels, depth + 1))
+
     return root
+
+# 其他辅助函数（chooseBestFeatureToSplit, majorityCnt, splitDataset）的实现需要根据具体情况添加。
+
 
 
 def majorityCnt(class_list):
@@ -169,8 +170,8 @@ def predict(tree, feature_labels, test_data):
 if __name__ == '__main__':
     dataset, labels = createDataset('../dataset/watermelon2.0.csv')
     labels_backup = labels[:]
+    featureLabels = []
     tree = createTree(dataset, labels, max_depth=3)
-    # plotTree.createPlot(tree)
 
     test_data = [
         ['青绿', '蜷缩', '浊响', '清晰', '凹陷', '硬滑'],
